@@ -27,7 +27,7 @@
                     <i class="fa fa-trash-alt"></i>
                 </button>
 
-                <button class="btn btn-primary"
+                <button class="btn btn-primary" @click="onSelectImage"
                     >
                     Subir foto
                     <i class="fa fa-upload"></i>
@@ -43,12 +43,15 @@
             ></textarea>
         </div>
 
-
-        
+        <img 
+            v-if="entry.picture && !localImage"
+            :src="entry.picture" 
+            alt="entry-picture"
+            class="img-thumbnail">
 
         <img 
-            
-            src="https://www.esportmaniacos.com/wp-content/uploads/2021/11/Final-katarina1-780x470.jpg" 
+            v-if="localImage"
+            :src="localImage" 
             alt="entry-picture"
             class="img-thumbnail">
 
@@ -65,6 +68,7 @@
 import { defineAsyncComponent } from 'vue'
 import { mapGetters, mapActions } from 'vuex' // computed!!!
 import getDayMonthYear from '../helpers/getDayMonthYear'
+import uploadImage from '../helpers/uploadImage'
 import Swal from 'sweetalert2'
 
 
@@ -131,6 +135,9 @@ export default {
             })
             Swal.showLoading()
 
+            const picture = await uploadImage( this.file )
+            this.entry.picture = picture
+
             if ( this.entry.id  ) {
                 // Actualizar
                 await this.updateEntry( this.entry )
@@ -141,6 +148,7 @@ export default {
             }
 
             Swal.fire('Guardado', 'Entrada registrada con éxito', 'success')
+            this.file=null
 
         },
         async onDeleteEntry(){
@@ -165,6 +173,22 @@ export default {
             }
 
         },
+        onSelectedImage( event ){
+            const file = (event.target.files[0])
+            if ( !file ){
+                this.localImage = null
+                return
+            }
+
+            this.file = file
+
+            const fr = new FileReader()
+            fr.onload = () => this.localImage = fr.result
+            fr.readAsDataURL( file )
+        },
+        onSelectImage(){
+            this.$refs.imageSelector.click()
+        }
     },
 
     created() {

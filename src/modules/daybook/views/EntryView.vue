@@ -19,6 +19,7 @@
                 >
                 
                 <button 
+                    @click="onDeleteEntry"
                     v-if="entry.id"
                     class="btn btn-danger mx-2"
                     >
@@ -63,9 +64,8 @@
 <script>
 import { defineAsyncComponent } from 'vue'
 import { mapGetters, mapActions } from 'vuex' // computed!!!
-
-
 import getDayMonthYear from '../helpers/getDayMonthYear'
+import Swal from 'sweetalert2'
 
 
 
@@ -105,7 +105,7 @@ export default {
     },
 
     methods: {
-        ...mapActions('journal', ['updateEntry','createEntry']),
+        ...mapActions('journal', ['updateEntry','createEntry','deleteEntry']),
 
         loadEntry() {
             
@@ -125,8 +125,12 @@ export default {
         },
         async saveEntry() {
 
+            new Swal({
+                title: 'Espere por favor',
+                allowOutsideClick: false
+            })
+            Swal.showLoading()
 
-            
             if ( this.entry.id  ) {
                 // Actualizar
                 await this.updateEntry( this.entry )
@@ -136,9 +140,31 @@ export default {
                 this.$router.push({ name: 'entry', params: { id } })
             }
 
-            
+            Swal.fire('Guardado', 'Entrada registrada con éxito', 'success')
 
-        }
+        },
+        async onDeleteEntry(){
+
+            const { isConfirmed } = await Swal.fire({
+                title: '¿Está seguro?',
+                text: 'Una vez borrado, no se puede recuperar',
+                showDenyButton: true,
+                confirmButtonText: 'Si, estoy seguro'
+            })
+
+            if ( isConfirmed ){
+                new Swal({
+                    title: 'Espere por favor',
+                    allowOutsideClick: false
+                })
+                Swal.showLoading()
+                this.deleteEntry(this.entry.id)
+                this.$router.push( {name: 'no-entry'} )
+
+                Swal.fire('Eliminado', '', 'success')
+            }
+
+        },
     },
 
     created() {

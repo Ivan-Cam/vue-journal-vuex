@@ -8,6 +8,12 @@ export const loadEntries = async ({ commit }) => {
     const { data } = await journalApi.get('/entries.json')
 
     if ( !data ){
+        commit( 'setEntries', [] )
+        return
+    }
+
+
+    if ( !data ){
         commit('setEntries', [] )
         return
     }
@@ -52,10 +58,10 @@ export const createEntry = async ({ commit }, entry ) => {
 }
 
 
-// export const deleteEntry = async ({ commit }, id ) => {
+export const deleteEntry = async ({ commit }, id ) => {
 
-//     await journalApi.delete(`/entries/${ id }.json`)
-//     commit('deleteEntry', id)
+    await journalApi.delete(`/entries/${ id }.json`)
+    commit('deleteEntry', id)
 
-//     return id
-// }
+    return id
+}
